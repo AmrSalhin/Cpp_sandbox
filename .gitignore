@@ -1,0 +1,30 @@
+# --- Visual Studio / MSVC ---
+.vs/
+*.user
+*.suo
+*.db
+*.opensdf
+*.sdf
+*.opensdf
+*.opendb
+*.VC.db
+
+# --- Build Results ---
+Debug/
+Release/
+x64/
+x86/
+bin/
+obj/
+*.exe
+*.dll
+*.lib
+*.pdb
+*.exp
+
+# --- Other common junk ---
+*.log
+*.ilk
+*.idb
+*.aps
+*.tlog
