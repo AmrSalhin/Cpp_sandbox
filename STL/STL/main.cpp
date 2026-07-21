@@ -7,6 +7,185 @@
 #include <map>
 #include <set>
 #include <functional>
+#include <unordered_set>
+#include <unordered_map>
+
+/*creating a custom type to create hash and equality functions*/
+class NewType
+{
+    int value;
+    std::string name;
+    public:
+    NewType(int v, std::string n): value(v), name(n) {}
+    int getValue() const { return value; }
+    std::string getName() const { return name; }
+    /*implementing comparison operators to enable use in ordered containers*/
+    bool operator==(const NewType& other) const
+    {
+        return (value == other.value && name == other.name);
+    }
+
+    bool operator!=(const NewType& other) const
+    {
+        return !(*this == other);
+    }
+
+    bool operator<(const NewType& other) const
+    {
+        return (value < other.value || (value == other.value && name < other.name));
+    }
+
+    bool operator>(const NewType& other) const
+    {
+        return (value > other.value || (value == other.value && name > other.name));
+    }
+};
+
+struct NewTypeHash
+{
+    std::size_t operator()(const NewType& obj) const
+    {
+        return (std::hash<int>()(obj.getValue()) ^ std::hash<std::string>()(obj.getName()));
+    }
+};
+
+struct NewTypeEqual
+{
+    bool operator()(const NewType& lhs, const NewType& rhs) const
+    {
+        return (lhs.getValue() == rhs.getValue() && lhs.getName() == rhs.getName());
+    }
+};
+
+void unorderSet()
+{
+    std::cout << "============== Unordered Set ==============" << std::endl;
+    std::unordered_set<NewType, NewTypeHash, NewTypeEqual> mySet{
+        NewType(1, "one"), NewType(2, "two"), NewType(3, "three"), NewType(4, "four"), NewType(5, "five"), NewType(50, "fifty")
+    };
+    std::cout << "number Of Buckets: " << mySet.bucket_count() << std::endl;
+    std::cout << "Number Of Elements: " << mySet.size() << std::endl;
+    std::cout << "Load Factor: " << mySet.load_factor() << std::endl;
+    /*remove duplicates */
+    mySet.insert(NewType(4, "four"));
+    std::cout << "inserted four again" << std::endl;
+    std::cout << "number Of Buckets: " << mySet.bucket_count() << std::endl;
+    std::cout << "Number Of Elements: " << mySet.size() << std::endl;
+    std::cout << "Load Factor: " << mySet.load_factor() << std::endl;
+    std::cout << "All occurrences of four: " << std::endl;
+    auto found = mySet.equal_range(NewType(4, "four"));
+    while(found.first != found.second)
+    {
+        std::cout << "four found in bucket: " << mySet.bucket(*found.first) << std::endl;
+        ++found.first;
+    }
+    std::cout << "All elements in the unordered set: " << std::endl;
+    for(const auto& val: mySet)
+    {
+        std::cout << "Value: " << val.getValue() << " Name: " << val.getName() << " Bucket: " << mySet.bucket(val) <<std::endl;
+    }
+    std::cout <<std::endl;
+}
+
+void unorderedMultiSet()
+{
+    std::cout << "============== Unordered MultiSet ==============" << std::endl;
+    std::unordered_multiset<NewType, NewTypeHash, NewTypeEqual> mySet{
+        NewType(1, "one"), NewType(2, "two"), NewType(3, "three"), NewType(4, "four"), NewType(5, "five"), NewType(50, "fifty")
+    };
+    std::cout << "number Of Buckets: " << mySet.bucket_count() << std::endl;
+    std::cout << "Number Of Elements: " << mySet.size() << std::endl;
+    std::cout << "Load Factor: " << mySet.load_factor() << std::endl;
+    /*allow duplicates */
+    mySet.insert(NewType(4, "four"));
+    std::cout << "inserted four again" << std::endl;
+    std::cout << "number Of Buckets: " << mySet.bucket_count() << std::endl;
+    std::cout << "Number Of Elements: " << mySet.size() << std::endl;
+    std::cout << "Load Factor: " << mySet.load_factor() << std::endl;
+    /*return the first occurrence of "four" */
+    auto ite = mySet.find(NewType(4, "four"));
+    if(ite != mySet.end())
+    {
+        std::cout << "four found in bucket: " << mySet.bucket(*ite) << std::endl;
+    }
+    std::cout << "All occurrences of four: " << std::endl;
+    auto found = mySet.equal_range(NewType(4, "four"));
+    while(found.first != found.second)
+    {
+        std::cout << "four found in bucket: " << mySet.bucket(*found.first) << std::endl;
+        ++found.first;
+    }
+    std::cout << "All elements in the unordered MultiSet: " << std::endl;
+    for(const auto& val: mySet)
+    {
+        std::cout << "Value: " << val.getValue() << " Name: " << val.getName() << " Bucket: " << mySet.bucket(val) <<std::endl;
+    }
+    std::cout <<std::endl;
+}
+
+void unorderMap()
+{
+    std::cout << "============== Unordered Map ==============" << std::endl;
+    std::unordered_map<std::string, int> mySet{
+        {"one", 1}, {"two", 2}, {"three", 3}, {"four", 4}, {"five", 5}, {"fifty", 50}};
+    std::cout << "number Of Buckets: " << mySet.bucket_count() << std::endl;
+    std::cout << "Number Of Elements: " << mySet.size() << std::endl;
+    std::cout << "Load Factor: " << mySet.load_factor() << std::endl;
+    /*remove duplicates */
+    mySet.insert({"four", 4});
+    std::cout << "inserted four again" << std::endl;
+    std::cout << "number Of Buckets: " << mySet.bucket_count() << std::endl;
+    std::cout << "Number Of Elements: " << mySet.size() << std::endl;
+    std::cout << "Load Factor: " << mySet.load_factor() << std::endl;
+    std::cout << "All occurrences of four: " << std::endl;
+    auto found = mySet.equal_range("four");
+    while(found.first != found.second)
+    {
+        std::cout << "four found in bucket: " << mySet.bucket(found.first->first) << std::endl;
+        ++found.first;
+    }
+    std::cout << "All elements in the unordered map: " << std::endl;
+    for(const auto& val: mySet)
+    {
+        std::cout << "Value: " << val.first << ": " << val.second << " Bucket: " << mySet.bucket(val.first) <<std::endl;
+    }
+    std::cout <<std::endl;
+}
+
+void unorderedMultiMap()
+{
+    std::cout << "============== Unordered MultiMap ==============" << std::endl;
+    std::unordered_multimap<std::string, int> mySet{
+        {"one", 1}, {"two", 2}, {"three", 3}, {"four", 4}, {"five", 5}, {"fifty", 50}};
+    std::cout << "number Of Buckets: " << mySet.bucket_count() << std::endl;
+    std::cout << "Number Of Elements: " << mySet.size() << std::endl;
+    std::cout << "Load Factor: " << mySet.load_factor() << std::endl;
+    /*allow duplicates */
+    mySet.insert({"four", 4});
+    std::cout << "inserted four again" << std::endl;
+    std::cout << "number Of Buckets: " << mySet.bucket_count() << std::endl;
+    std::cout << "Number Of Elements: " << mySet.size() << std::endl;
+    std::cout << "Load Factor: " << mySet.load_factor() << std::endl;
+    /*return the first occurrence of "four" */
+    auto ite = mySet.find("four");
+    if(ite != mySet.end())
+    {
+        std::cout << "four found in bucket: " << mySet.bucket(ite->first) << std::endl;
+    }
+    std::cout << "All occurrences of four: " << std::endl;
+    auto found = mySet.equal_range("four");
+    while(found.first != found.second)
+    {
+        std::cout << "four found in bucket: " << mySet.bucket(found.first->first) << std::endl;
+        ++found.first;
+    }
+    std::cout << "All elements in the unordered MultiMap: " << std::endl;
+    for(const auto& val: mySet)
+    {
+        std::cout << "Value: " << val.first << ": " << val.second << " Bucket: " << mySet.bucket(val.first) <<std::endl;
+    }
+    std::cout <<std::endl;
+}
 
 void array()
 {
@@ -212,15 +391,15 @@ void MultiMap()
 int main() {
     /*****************************  Sequence Containers *************************************/
 
-    // array();
+    array();
 
-    // vector();
+    vector();
     
-    // list();
+    list();
     
-    // forwardList();
+    forwardList();
 
-    // deque();
+    deque();
 
 
     /*****************************  Associative Containers *************************************/
@@ -234,7 +413,13 @@ int main() {
     MultiMap();
 
     /*****************************  Unordered Containers *************************************/
+    unorderSet();
+    
+    unorderMap();
 
+    unorderedMultiSet();
+
+    unorderedMultiMap();
 
     return 0;
 }
