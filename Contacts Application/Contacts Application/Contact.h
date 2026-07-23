@@ -1,7 +1,7 @@
 #pragma once
 #include<string>
 
-enum class Group : char{Friends, Family, Coworker, Acquaintance};
+enum class Group : char{Friends = 1, Family, Coworker, Acquaintance};
 
 struct Contact
 {
